@@ -10,6 +10,8 @@ in Mini vMac at 1x speed in system 7. The program touches
 the file system, it isn't capable of writing, but may
 not close files correctly.
 
+Confirmed working on SE/30 running System 7.
+
 This interpreter in chip-8 mode satisfies all of
 Timendus' Chip-8 test suite v4.2<br /> 
 https://github.com/Timendus/chip8-test-suite
