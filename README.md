@@ -1,8 +1,7 @@
 # Chip-68
 A chip 8 interpreter for 68k macs
 
-!!!THIS IS VERY ALPHA SOFTWARE!!!
-
+!!!THIS IS VERY ALPHA SOFTWARE!!!\n
       use at your own risk
 
 Chip 68 is a chip-8 and super chip-8 interpreter for
@@ -12,7 +11,7 @@ the file system, it isn't capable of writing, but may
 not close files correctly.
 
 This interpreter in chip-8 mode satisfies all of
-Timendus' Chip-8 test suite v4.2
+Timendus' Chip-8 test suite v4.2\n
 https://github.com/Timendus/chip8-test-suite
 
 In super chip mode it fails screen.wait in
