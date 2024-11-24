@@ -1,5 +1,5 @@
 # Chip-68
-A chip 8 interpreter for 68k macs
+A chip 8 interpreter for vintage macintosh
 
 !!!THIS IS VERY ALPHA SOFTWARE!!!<br /> 
       use at your own risk
