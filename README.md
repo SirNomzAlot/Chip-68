@@ -2,6 +2,7 @@
 A chip 8 interpreter for 68k macs
 
 !!!THIS IS VERY ALPHA SOFTWARE!!!
+
       use at your own risk
 
 Chip 68 is a chip-8 and super chip-8 interpreter for
