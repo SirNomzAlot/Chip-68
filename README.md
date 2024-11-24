@@ -27,3 +27,8 @@ instruction the interpreter halts execution. toggle compat or reset.
 
 The keyboard layout is the modern keyboard standard<br /> 
 1-4, 1-z.
+
+to build you need a valid install of retro68, then run<br />
+cmake -DCMAKE_TOOLCHAIN_FILE=???/Retro68-build/toolchain/m68k-apple-macos/cmake/retro68.toolchain.cmake
+however change the question marks to properly point to your install.
+then make.
