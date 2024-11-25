@@ -99,15 +99,27 @@ void menuBarInit() {
 void doLoop() {
 	if (!multifinder) {
 		SystemTask();
-		GetNextEvent(everyEvent, &event);
-		eventHandler(&event);
+		if (!GetNextEvent(everyEvent, &event)) {
+			return;
+		}
+	} else if (!WaitNextEvent(everyEvent, &event, max_sleep, NULL)) {
 		return;
 	}
-	if (WaitNextEvent(everyEvent, &event, max_sleep, NULL)) {
-		eventHandler(&event);
-		//updateTimer();
-		//loopCount++;
+	eventHandler(&event);
+	if (!step) {
+		interpretForTick();
 	}
+	decTimers();
+}
+
+// this crashes something fierce
+// and i have no idea why
+void resize(short sx, short sy) {
+	//BeginUpdate(window);
+	Debugger();
+	SizeWindow(window, sx, sy, true);
+	//InvalRect(&windowRect);
+	//EndUpdate(window);
 }
 
 void eventHandler(EventRecord* event) {
@@ -167,87 +179,6 @@ void autoKeyHandler(EventRecord* event) {
 		interpretForTick();
 	}
 }
-
-SFReply r; //because lazy
-void menuBarHandler(EventRecord* event) {
-	short menuID, itemNum;
-	long var = MenuSelect(event->where);
-	menuID = HiWord(var);
-	itemNum = LoWord(var);
-	switch (menuID) {
-	case 128:
-		mprintf("%d is 128 item num", itemNum);
-		return;
-	case 129:
-		//mprintf("%d is 129 item num", itemNum);
-			switch (itemNum) {
-			case 1:
-				reset();
-				currKey = '\0';
-				return;
-			case 2:
-				//SFGetFile((Point){100,100},NULL,NULL,4,list,NULL,&r);
-				SFGetFile((Point){100,100},NULL,NULL,0,list,NULL,&r);
-				if (!r.good) {
-					fileError(0);
-					return;
-				}
-				closeFile();
-				openFile(&r);
-				reset();
-				readFile();
-				return;
-			case 3:
-				return;
-			case 5:
-				shouldClose=true;
-				interpreterCleanup();
-				screenCleanup();
-				SetEventMask(oldSysMask);
-				ExitToShell();
-				return;
-			default:
-				return;
-			}
-		return;
-	case 130:
-		//mprintf("%d is 130 item num", itemNum);
-		return;
-	case 131:
-		switch (itemNum) {
-		case 1:
-			toggleCompat();
-			return;
-		case 2:
-			return;
-		case 3:
-			clock=1;
-			step = true;
-			renderCPU();
-			interpretForTick();
-			return;
-		case 4:
-			return;
-		case 5:
-			clock=CLOCK_SLOW;
-			step = false;
-			return;
-		case 6:
-			clock=CLOCK_NORM;
-			step = false;
-			return;
-		case 7:
-			clock=CLOCK_FAST;
-			step = false;
-			return;
-		default:
-			return;
-		}
-	default:
-		mprintf("%d is menu id", menuID);
-	}
-}
-
 void mouseDownHandler(EventRecord* event) {
 	WindowPtr eventWindow;
 	short int object;
@@ -275,6 +206,137 @@ void mouseDownHandler(EventRecord* event) {
 				shouldClose=true;
 			}
 			return;
+	}
+}
+
+SFReply r; //because lazy
+void menuBarHandler(EventRecord* event) {
+	short menuID, itemNum;
+	long var = MenuSelect(event->where);
+	menuID = HiWord(var);
+	itemNum = LoWord(var);
+	switch (menuID) {
+	case 128:
+		inAppleMenu(itemNum);
+		return;
+	case 129:
+		inFileMenu(itemNum);
+		return;
+	case 130:
+		inEditMenu(itemNum);
+		return;
+	case 131:
+		inWindowMenu(itemNum);
+		return;
+	case 132:
+		inInterpreterMenu(itemNum);
+		return;
+	default:
+		mprintf("%d is menu id", menuID);
+	}
+}
+
+void inAppleMenu(short itemNum) {
+	mprintf("%d is 128 item num", itemNum);
+}
+
+void inFileMenu(short itemNum) {
+	switch (itemNum) {
+	case 1: // reset
+		reset();
+		currKey = '\0';
+		return;
+	case 2: // load PRGM
+		//dun work and who wants to edit the type anyways.
+		//SFGetFile((Point){100,100},NULL,NULL,4,list,NULL,&r);
+		SFGetFile((Point){100,100},NULL,NULL,0,list,NULL,&r);
+		if (!r.good) {
+			fileError(0);
+			return;
+		}
+		closeFile();
+		openFile(&r);
+		reset();
+		readFile();
+		return;
+	case 3: // new PRGM
+		return;
+	case 5: // quit
+		shouldClose=true;
+		EndUpdate(window);
+		interpreterCleanup();
+		screenCleanup();
+		//opcodeCleanup(); //called in interpreter cleanup
+		SetEventMask(oldSysMask);
+		ExitToShell();
+		return;
+	default:
+		return;
+	}
+}
+
+void inEditMenu(short itemNum) {
+	return; // theres no editing rn
+}
+
+void inWindowMenu(short itemNum) {
+	switch (itemNum) {
+	case 1:
+		setMultiplier(1);
+		return;
+	case 2:
+		setMultiplier(2);
+		return;
+	case 3:
+		setMultiplier(3);
+		return;
+	default:
+		return;
+	}
+}
+
+void inInterpreterMenu(short itemNum) {
+	switch (itemNum) {
+	case 1:	// toggle compat
+		chipMode();
+		return;
+	case 2:
+		superMode();
+		return;
+	case 3:
+		superModernMode();
+		return;
+	case 4:
+		xoMode();
+		return;
+	case 5:	// divider thing
+		return;
+	case 6:	// step
+		clock=1;
+		step = true;
+		renderCPU();
+		interpretForTick();
+		return;
+	case 7:	// divider thing
+		return;
+	case 8:	// clock slow
+		clock=CLOCK_SLOW;
+		step = false;
+		return;
+	case 9:	// clock medium
+		clock=CLOCK_MEDIUM;
+		step = false;
+		return;
+	case 10:	// clock normal
+		clock=CLOCK_NORMAL;
+		step = false;
+		return;
+	case 11:	// clock ludicrous
+		clock=CLOCK_LUDICROUS; // we brake for nobody, exept the cpu limits
+		step = false;
+		return;
+	default:
+		return;
 	}
 }
 

@@ -43,12 +43,20 @@ void menuBarInit();
 
 void doLoop();
 
+void resize(short sx, short sy);
+
 void eventHandler(EventRecord* event);
 void keyDownHandler(EventRecord* event);
 void keyUpHandler(EventRecord* event);
 void autoKeyHandler(EventRecord* event);
-void menuBarHandler(EventRecord* event);
 void mouseDownHandler(EventRecord* event);
+void menuBarHandler(EventRecord* event);
+
+void inAppleMenu(short itemNum);
+void inFileMenu(short itemNum);
+void inEditMenu(short itemNum);
+void inWindowMenu(short itemNum);
+void inInterpreterMenu(short itemNum);
 
 bool openFile(SFReply* r);
 void fileError(OSErr e);

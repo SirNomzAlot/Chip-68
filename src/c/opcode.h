@@ -1,6 +1,8 @@
 #ifndef opcode_h
 #define opcode_h
 
+#include <MacTypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef enum _vsel {
@@ -37,7 +39,7 @@ extern uint8_t* memory;
 extern registers* cpu;
 static uint16_t stack[0x16];
 
-void opcodeInit();
+bool opcodeInit();
 void opcodeCleanup();
 
 void cls();
@@ -91,9 +93,15 @@ void scl();
 void exiti();
 void low();
 void high();
-void drwW(vsel Vx, vsel Vy);
+void drwSUPR(vsel Vx, vsel Vy);
 void ldv(vsel V);
 void ldtrpl(uint8_t nibble);
 void ldfrpl(uint8_t nibble);
+
+// XO chip
+
+void drwLXO(vsel Vx, vsel Vy, uint8_t nibble);
+void drwHXO(vsel Vx, vsel Vy);
+void ldiL();
 
 #endif

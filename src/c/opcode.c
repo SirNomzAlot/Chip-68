@@ -5,19 +5,23 @@
 
 #include "textutils.h"
 
+#include <MacTypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 uint8_t* memory;
 registers* cpu;
 
-void opcodeInit() {
+bool opcodeInit() {
 	cpu = malloc(sizeof(registers));
-	memory = malloc(sizeof(uint8_t)*0x1000);
+	//memory = malloc(0x10000);
+	memory = malloc(0x1000);
 	if (cpu==NULL||memory==NULL) {
-		return; //ahhhhhh
+		return false;
 	}
 	*cpu = (registers){{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},0,0,0,0x200,0};
+	return true;
 }
 
 void opcodeCleanup() {
@@ -452,13 +456,13 @@ void scl() {
 // 00FD
 // exit interpreter
 void exiti() {
-	return;;
+	return;
 }
 
 // 00FE
 // disable extended screen
 void low() {
-	scale*=2;
+	normalScale();
 	wideScreen=false;
 	cpu->pc+=2;
 }
@@ -466,7 +470,7 @@ void low() {
 // 00FF
 // enable extended screen
 void high() {
-	scale/=2;
+	highScale();
 	wideScreen=true;
 	cpu->pc+=2;
 }
@@ -474,7 +478,7 @@ void high() {
 // Dxy0
 // superchip specific draw
 // if n==0 and extended 16x16 sprite
-void drwW(vsel Vx, vsel Vy) {
+void drwSUPR(vsel Vx, vsel Vy) {
 	uint16_t y;
 	uint8_t hold, Vxx, Vyy;
 	char b, till;
@@ -520,5 +524,64 @@ void ldtrpl(uint8_t nibble) {
 // Fx85
 // read V0-Vx from RPL user flag (x<=7)
 void ldfrpl(uint8_t nibble) {
+	cpu->pc+=2;
+}
+
+// XO chip specific
+
+void drwLXO(vsel Vx, vsel Vy, uint8_t nibble) {
+	uint16_t c;
+	uint8_t hold, Vxx, Vyy;
+	char b;
+
+	Vxx=cpu->reg[Vx];
+	Vyy=cpu->reg[Vy];
+	cpu->reg[VF]=0;
+	for (c=0;c<nibble;c++) {
+		hold = memory[cpu->i+c];
+		for (b=0;b<8;b++) {
+			if (screen[((Vxx+b)%64)*64+(Vyy+c)%32]&(hold>>(7-b))&0x1) {
+				cpu->reg[VF]=1;
+			}
+			screen[((Vxx+b)%64)*64+(Vyy+c)%32]^=(hold>>(7-b))&0x1;
+			drawPixel((Vxx+b)%64,(Vyy+c)%32);
+		}
+	}
+	cpu->pc+=2;
+}
+
+void drwHXO(vsel Vx, vsel Vy) {
+	uint16_t y;
+	uint8_t hold, Vxx, Vyy;
+	char b;
+
+	Vxx=cpu->reg[Vx];
+	Vyy=cpu->reg[Vy];
+	
+	cpu->reg[VF]=0;
+	for (y=0;y<16;y++) {
+		hold = memory[cpu->i+y*2];
+		for (b=0;b<8;b++) {
+			if (screen[((Vxx+b)%128)*64+(Vyy+y)%64]&(hold>>(7-b))&0x1) {
+				cpu->reg[VF]=1;
+			}
+			screen[((Vxx+b)%128)*64+(Vyy+y)%64]^=(hold>>(7-b))&0x1;
+			drawPixel((Vxx+b)%128,(Vyy+y)%64);
+		}
+		hold = memory[cpu->i+y*2+1];
+		for (b=0;b<8;b++) {
+			if (screen[((Vxx+b+8)%128)*64+(Vyy+y)%64]&(hold>>(7-b))&0x1) {
+				cpu->reg[VF]=1;
+			}
+			screen[((Vxx+b+8)%128)*64+(Vyy+y)%64]^=(hold>>(7-b))&0x1;
+			drawPixel((Vxx+b+8)%128,(Vyy+y)%64);
+		}
+	}
+	cpu->pc+=2;
+}
+
+void ldiL() {
+	cpu->pc+=2;
+	cpu->i=((uint16_t)memory[cpu->pc])<<8+memory[cpu->pc+1];
 	cpu->pc+=2;
 }

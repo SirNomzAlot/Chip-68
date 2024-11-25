@@ -6,15 +6,15 @@
 
 int main(int argc, char** argv) {
 	coreInit();
-	interpreterInit();
+	if (!interpreterInit()) {
+		coreCleanUp();
+		ExitToShell();
+		return -1;
+	}
 	screenInit();
 	loadTest();
 	while (!shouldClose) {
 		doLoop();
-		if (!step) {
-			interpretForTick();
-		}
-		decTimers();
 	}
 	interpreterCleanup();
 	screenCleanup();

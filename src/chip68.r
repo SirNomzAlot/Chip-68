@@ -42,21 +42,36 @@ resource 'MENU' (130) {
 
 resource 'MENU' (131) {
 	131, textmenuProc;
+	0, enabled; // nah
+	"Window";
+	{
+		"Scale x1", noIcon, noKey, noMark, plain;
+		"Scale x2", noIcon, noKey, noMark, plain;
+		"Scale x3", noIcon, noKey, noMark, plain;
+	}
+};
+
+resource 'MENU' (132) {
+	132, textmenuProc;
 	allEnabled, enabled;
 	"Interpreter";
 	{
-		"Toggle Super Compat", noIcon, noKey, noMark, plain;
+		"Chip-8 Mode", noIcon, noKey, noMark, plain;
+		"SChip-8 Mode", noIcon, noKey, noMark, plain;
+		"SChip v1.1 Mode", noIcon, noKey, noMark, plain;
+		"XO-Chip Mode", noIcon, noKey, noMark, plain;
 		"-", noIcon, noKey, noMark, plain;
 		"Step", noIcon, "S", noMark, plain;
 		"-", noIcon, noKey, noMark, plain;
 		"Speed Slow", noIcon, noKey, noMark, plain;
+		"Speed Medium", noIcon, noKey, noMark, plain;
 		"Speed Normal", noIcon, noKey, noMark, plain;
-		"Speed Fast", noIcon, noKey, noMark, plain;
+		"Speed Ludicrous", noIcon, noKey, noMark, plain;
 	}
 };
 
 resource 'MBAR' (128) {
-	{128,129,130,131}
+	{128,129,130,131, 132}
 };
 
 data 'TEXT' (128) {

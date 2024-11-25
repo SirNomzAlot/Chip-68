@@ -6,8 +6,9 @@
 #include <stdbool.h>
 
 #define CLOCK_SLOW 2 // 120hz
-#define CLOCK_NORM 8 // 520hz
-#define CLOCK_FAST 16// 960hz
+#define CLOCK_MEDIUM 4 // 240hz
+#define CLOCK_NORMAL 8 // 520hz
+#define CLOCK_LUDICROUS 16// 960hz
 
 extern bool super;
 extern bool step;
@@ -15,10 +16,15 @@ extern short clock;
 
 extern uint8_t key;
 
-void interpreterInit();
+static short mode; // 1 chip, 2 super, 3 super v1.1, 4 xo
+
+bool interpreterInit();
 void memoryInit();
 void reset();
-void toggleCompat();
+void chipMode();
+void superMode();
+void superModernMode();
+void xoMode();
 void interpretForTick();
 void decTimers();
 void loadTest();
@@ -26,18 +32,25 @@ void renderCPU();
 void interpreterCleanup();
 void fault();
 
-void ops0ORIG(uint16_t op);
+void ops0CHIP(uint16_t op);
 void ops0SUPR(uint16_t op);
+void ops0XO(uint16_t op);
 
-void ops8ORIG(uint16_t op);
+void ops8CHIP(uint16_t op);
 void ops8SUPR(uint16_t op);
+void ops8XO(uint16_t op);
 
 void opsB(uint16_t op);
 void opsE(uint16_t op);
 //void opESUPER(uint16_t op);
 
-void opsFORIG(uint16_t op);
+void opsDCHIP(uint16_t op);
+void opsDSUPR(uint16_t op);
+void opsDXO(uint16_t op);
+
+void opsFCHIP(uint16_t op);
 void opsFSUPR(uint16_t op);
+void opsFXO(uint16_t op);
 
 
 uint8_t keyToKeypad(char key);

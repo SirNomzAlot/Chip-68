@@ -14,28 +14,35 @@
 
 bool super = false;
 bool step = false;
-short clock = CLOCK_NORM;
+short clock = CLOCK_NORMAL;
 
 uint8_t key;
 
 static void(*ops0)(uint16_t);
 static void(*ops8)(uint16_t);
+static void(*opsD)(uint16_t);
 static void(*opsF)(uint16_t);
 
-void interpreterInit() {
-	opcodeInit();
-	ops0=&ops0ORIG;
-	ops8=&ops8ORIG;
-	opsF=&opsFORIG;
+bool interpreterInit() {
+	if (!opcodeInit()) {
+		return false;
+	}
+	ops0=&ops0CHIP;
+	ops8=&ops8CHIP;
+	opsD=&opsDCHIP;
+	opsF=&opsFCHIP;
+	mode = 1;
 	key=0xFF;
 	memcpy(memory, romSprite, 16*5);
 	loadTest();
+	return true;
 }
 
 void reset() {
 	int c;
-	clock = (clock) ? clock : CLOCK_NORM;
-	cpu->pc=0x200-2;
+	cls();
+	clock = (clock) ? clock : CLOCK_NORMAL;
+	cpu->pc=0x200;
 	cpu->sp=0;
 	cpu->delay=0;
 	cpu->sound=0;
@@ -46,7 +53,6 @@ void reset() {
 	key=0xFF;
 	wideScreen = false;
 	memcpy(memory, romSprite, 16*5);
-	cls();
 	if (!fileOpen) {
 		loadTest();
 		return;
@@ -54,21 +60,60 @@ void reset() {
 	readFile();
 }
 
-void toggleCompat() {
-	clock = (clock) ? clock : CLOCK_NORM;
-	reset();
-	if (!super) {
-		ops0=&ops0SUPR;
-		ops8=&ops8SUPR;
-		opsF=&opsFSUPR;
-		super=true;
+void chipMode() {
+	if (mode==1) {
 		return;
 	}
-	ops0=&ops0ORIG;
-	ops8=&ops8ORIG;
-	opsF=&opsFORIG;
+	clock = (clock) ? clock : CLOCK_NORMAL;
+	reset();
+	mode=1;
+	ops0=&ops0CHIP;
+	ops8=&ops8CHIP;
+	opsD=&opsDCHIP;
+	opsF=&opsFCHIP;
 	wideScreen = false;
 	super = false;
+}
+
+void superMode() {
+	if (mode==2) {
+		return;
+	}
+	mode=2;
+	clock = (clock) ? clock : CLOCK_NORMAL;
+	reset();
+	ops0=&ops0SUPR;
+	ops8=&ops8SUPR;
+	opsD=&opsDSUPR;
+	opsF=&opsFSUPR;
+	super=true;
+}
+void superModernMode() {
+	if (mode==3) {
+		return;
+	}
+	mode=3;
+	clock = (clock) ? clock : CLOCK_NORMAL;
+	reset();
+	ops0=&ops0SUPR;
+	ops8=&ops8SUPR;
+	opsD=&opsDSUPR;
+	opsF=&opsFSUPR;
+	super=true;
+}
+
+void xoMode() {
+	if (mode==4) {
+		return;
+	}
+	mode=4;
+	clock = (clock) ? clock : CLOCK_NORMAL;
+	reset();
+	ops0=&ops0XO;
+	ops8=&ops8XO;
+	opsD=&opsDXO;
+	opsF=&opsFXO;
+	super=false;
 }
 
 void interpretForTick() {
@@ -126,10 +171,7 @@ void interpretForTick() {
 			rnd((op>>8)&0xF, op&0xFF);
 			break;
 		case 0xD:
-			if (wideScreen&&(op&0xF)==0) {
-				drwW((op>>8)&0xF, (op>>4)&0xF);
-			}
-			drw((op>>8)&0xF, (op>>4)&0xF, op&0xF);
+			opsD(op);
 			break;
 		case 0xE:
 			opsE(op);
@@ -139,7 +181,6 @@ void interpretForTick() {
 			break;
 		}
 	}
-
 }
 
 void decTimers() {
@@ -324,7 +365,7 @@ uint8_t keyToKeypad(char key) {
 	}
 }
 
-void ops0ORIG(uint16_t op) {
+void ops0CHIP(uint16_t op) {
 	if (op==0x00E0) {
 		cls();
 		return;
@@ -368,7 +409,39 @@ void ops0SUPR(uint16_t op) {
 	}
 }
 
-void ops8ORIG(uint16_t op) {
+void ops0XO(uint16_t op) {
+	if (((op>>4)&0xF)==0xC) {
+		scd(op&0xF);
+		return;
+	}
+	switch (op&0xFF) {
+	case 0xE0:
+		cls();
+		return;
+	case 0xEE:
+		ret();
+		return;
+	case 0xFB:
+		scr();
+		return;
+	case 0xFC:
+		scl();
+		return;
+	case 0xFD:
+		exiti();
+		return;
+	case 0xFE:
+		low();
+		return;
+	case 0xFF:
+		high();
+		return;
+	default:
+		fault();
+	}
+}
+
+void ops8CHIP(uint16_t op) {
 	switch (op&0xF) {
 	case 0x0:
 		ldvv((op>>8)&0xF, (op>>4)&0xF);
@@ -436,6 +509,40 @@ void ops8SUPR(uint16_t op) {
 	}
 }
 
+void ops8XO(uint16_t op) {
+	switch (op&0xF) {
+	case 0x0:
+		ldvv((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x1:
+		orSUPR((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x2:
+		andSUPR((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x3:
+		eorSUPR((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x4:
+		addvv((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x5:
+		sub((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x6:
+		shrORIG((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0x7:
+		subn((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	case 0xE:
+		shlORIG((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	default:
+		fault();
+	}
+}
+
 void opsB(uint16_t op) {
 	if ( super) {
 		jpvSUPR((op>>8)&0xF, op&0xFFF);
@@ -457,7 +564,27 @@ void opsE(uint16_t op) {
 	}
 }
 
-void opsFORIG(uint16_t op) {
+void opsDCHIP(uint16_t op) {
+	drw((op>>8)&0xF, (op>>4)&0xF, op&0xF);
+}
+
+void opsDSUPR(uint16_t op) {
+	if (wideScreen&&(op&0xF)==0) {
+		drwSUPR((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	}
+	drw((op>>8)&0xF, (op>>4)&0xF, op&0xF);
+}
+
+void opsDXO(uint16_t op) {
+	if (wideScreen&&(op&0xF)==0) {
+		drwHXO((op>>8)&0xF, (op>>4)&0xF);
+		return;
+	}
+	drwLXO((op>>8)&0xF, (op>>4)&0xF, op&0xF);
+}
+
+void opsFCHIP(uint16_t op) {
 	switch (op&0xFF) {
 	case 0x07:
 		ldfd((op>>8)&0xF);
@@ -532,5 +659,53 @@ void opsFSUPR(uint16_t op) {
 	default:
 		fault();
 	}
+}
 
+void opsFXO(uint16_t op) {
+	switch (op&0xFF) {
+	case 0x00:
+		if (op&0xF00) {
+			fault();
+			return;
+		}
+		ldiL();
+	case 0x07:
+		ldfd((op>>8)&0xF);
+		return;
+	case 0x0A:
+		ldfk((op>>8)&0xF);
+		return;
+	case 0x15:
+		ldtd((op>>8)&0xF);
+		return;
+	case 0x18:
+		ldts((op>>8)&0xF);
+		return;
+	case 0x1E:
+		addi((op>>8)&0xF);
+		return;
+	case 0x29:
+		ldi((op>>8)&0xF);
+		return;
+	case 0x30:
+		ldv((op>>8)&0xF);
+		return;
+	case 0x33:
+		ldbcd((op>>8)&0xF);
+		return;
+	case 0x55:
+		ldtmiORIG((op>>8)&0xF);
+		return;
+	case 0x65:
+		ldfmiORIG((op>>8)&0xF);
+		return;		
+	case 0x75:
+		ldtrpl((op>>8)&0xF);
+		return;
+	case 0x85:
+		ldfrpl((op>>8)&0xF);
+		return;
+	default:
+		fault();
+	}
 }
