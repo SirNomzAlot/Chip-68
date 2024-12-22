@@ -17,8 +17,6 @@ bool super = false;
 bool step = false;
 short clock = CLOCK_NORMAL;
 
-uint8_t key;
-
 static void(*ops0)(uint16_t);
 static void(*ops8)(uint16_t);
 static void(*opsD)(uint16_t);
@@ -33,7 +31,6 @@ bool interpreterInit() {
 	opsD=&opsDCHIP;
 	opsF=&opsFCHIP;
 	mode = 1;
-	key=0xFF;
 	memcpy(memory, romSprite, 16*5);
 	loadTest();
 	return true;
@@ -52,14 +49,15 @@ void reset() {
 	for (c=0;c<16;c++) {
 		cpu->reg[c]=0;
 	}
-	key=0xFF;
+	for (c=0x200;c<0x1000;c++) {
+		memory[c]=0;
+	}
 	wideScreen = false;
 	memcpy(memory, romSprite, 16*5);
-	if (!fileOpen) {
+	if (!readRom()) {
 		loadTest();
 		return;
 	}
-	readFile();
 }
 
 void chipMode() {
@@ -185,12 +183,12 @@ void interpretForTick() {
 	}
 }
 
-void decTimers() {
+void decTimers(int delta) {
 	if (cpu->delay) {
-		cpu->delay--;
+		cpu->delay-=delta;
 	}
 	if (cpu->sound) {
-		cpu->sound--;
+		cpu->sound-=delta;
 	}
 }
 
@@ -210,10 +208,18 @@ void renderCPU() {
 	moveCursor(400,0);
 	newLine();
 	DrawCString("CPU STATE:\n");
-	if (super) {
-		DrawCString("SCHIP");
-	} else {
-		DrawCString("CHIP");
+	switch (mode) {
+	case 1:
+		DrawCString("CHIP-8");
+		break;
+	case 2:
+		DrawCString("SCHIP-8");
+		break;
+	case 3:
+		DrawCString("SCHIP-8 V1.1");
+		break;
+	case 4:
+		DrawCString("XO-CHIP");
 	}
 	newLine();
 	DrawCString("OP: 0x");
@@ -316,8 +322,13 @@ void renderCPU() {
 }
 
 void fault() {
+	int c;
+	uint8_t foo;
+	resize(500, 290);
 	renderCPU();
 	clock=0;
+	moveCursor(10,10);
+
 	// somethin i dunno
 }
 

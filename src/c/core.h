@@ -32,6 +32,7 @@ typedef struct _tickData {
 extern WindowPtr window;
 extern bool shouldClose;
 extern char currKey;
+extern char keyQueued;
 extern bool fileOpen;
 extern tickData timer;
 

@@ -5,12 +5,9 @@
 #include <StandardFile.h>
 #include <MacTypes.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-bool fileOpen = false;
-SFReply romInfo, test;
-
-short fRefNum;
-long fileLen;
+file rom = {0,0};
 
 SFTypeList list = {	(OSType)"BINA",
 					(OSType)"CHP8",
@@ -19,51 +16,43 @@ SFTypeList list = {	(OSType)"BINA",
 };
 
 bool tryOpenRead() {
+	SFReply test;
 	SFGetFile((Point){100,100},NULL,NULL,0,list,NULL,&test);
 	if (!test.good) {
 		return false;
 	}
-	closeFile();
-	if (!openFile(&test)) {
-		return false;
-	}
-	if (!readFile()) {
+	closeFile(&rom);
+	if (!openFile(&test, &rom)) {
 		return false;
 	}
 	reset();
+	//if (!readFile(rom, (uint8_t*)(memory+0x200))) {
+	//	return false;
+	//}
 	return true;
 }
 
-bool openFile(SFReply *file) {
+bool openFile(SFReply* sffile, file* f) {
 	OSErr e;
-	if (file->good == false) {
+	if (sffile->good == false) {
 		fileError(1);
 		return false;
 	}
-	if (file->vRefNum==romInfo.vRefNum&&pstrcmp(file->fName,romInfo.fName)) {
-		fileError(1);
-		return false;
-	}
-	e = FSOpen(file->fName, file->vRefNum, &fRefNum);
+	e = FSOpen(sffile->fName, sffile->vRefNum, &(f->fRefNum));
 	if (e) {
 		fileError(e);
 		return false;
 	}
-	e = GetEOF(fRefNum, &fileLen);
+	e = GetEOF(f->fRefNum, &(f->fileLen));
 	if (e) {
 		fileError(e);
 		return false;
 	}
-	if (fileLen>0xFFFF) {
+	if (f->fileLen>0x10000) {
 		fileError(1);
 		return false;
 	}
-	if (fileOpen) {
-		closeFile();
-	}
-	fileOpen=true;
-	pstrcpy(file->fName, romInfo.fName);
-	romInfo.vRefNum=file->vRefNum;
+	f->isOpen=true;
 	return true;
 }
 
@@ -72,19 +61,33 @@ void fileError(OSErr e) {
 	mprintf("File Error: %d", e);
 }
 
-bool readFile() {
+bool readFile(file f, uint8_t* buff) {
+	if (!f.isOpen) {
+		return false;
+	}
 	OSErr e;
-	e = FSRead(fRefNum, &fileLen, memory+0x200);
-	if (e&&e!=-39) {
+	long c = f.fileLen;
+	SetFPos(f.fRefNum, fsFromStart, 0);
+	e = FSRead(f.fRefNum, &c, buff);
+	if (e) {
 		fileError(e);
 		return false;
 	}
 	return true;
 }
-void closeFile() {
-	if (!fileOpen) {
+
+void closeFile(file* f) {
+	if (!f->isOpen) {
 		return;
 	}
-	FSClose(fRefNum);
-	fileOpen=false;
+	FSClose(f->fRefNum);
+	f->isOpen=false;
+}
+
+void closeRom() {
+	closeFile(&rom);
+}
+
+bool readRom() {
+	return readFile(rom, (uint8_t*)(memory+0x200));
 }

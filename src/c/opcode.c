@@ -13,8 +13,10 @@
 
 uint8_t* memory;
 registers* cpu;
+char currKeyDown = '\0';
 
 bool opcodeInit() {
+	int c;
 	cpu = malloc(sizeof(registers));
 	//memory = malloc(0x10000);
 	memory = malloc(0x10000);
@@ -24,6 +26,9 @@ bool opcodeInit() {
 		SysBeep(1);
 		clock = 0;
 		return false;
+	}
+	for (c=0;c<0x1000;c++) {
+		memory[c]=0;
 	}
 	*cpu = (registers){{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},0,0,0,0x200,0};
 	return true;
@@ -295,7 +300,8 @@ void drw(vsel Vx, vsel Vy, uint8_t nibble) {
 // skip next if keyboard == Vx
 // does not busy loop
 void skp(vsel V) {
-	uint8_t button = keyToKeypad(currKey);
+	uint8_t button = keyToKeypad(currKey) & keyToKeypad(keyQueued);
+	keyQueued = '\0';
 	if (button!=cpu->reg[V]||button==0xFF) {
 		cpu->pc+=2;
 		return;
@@ -307,7 +313,8 @@ void skp(vsel V) {
 // skip next if keyboard != Vx
 // does not busy loop
 void sknp(vsel V) {
-	uint8_t button = keyToKeypad(currKey);
+	uint8_t button = keyToKeypad(currKey) & keyToKeypad(keyQueued);
+	keyQueued = '\0';
 	if (button==cpu->reg[V]&&cpu->reg[V]!=0xFF) {
 		cpu->pc+=2;
 		return;
@@ -326,16 +333,17 @@ void ldfd(vsel V) {
 // set Vx = keyboard
 // does busy loop
 void ldfk(vsel V) {
-	uint8_t var = keyToKeypad(currKey);
-	if (var!=0xFF&&key==0xFF) {
-		key=var;
+	uint8_t var = keyToKeypad(currKey) & keyToKeypad(keyQueued);
+	keyQueued = '\0';
+	if (var==0xFF&&currKeyDown=='\0') {
 		return;
 	}
-	if (key==var) {
+	if (var!=0xFF) {
+		currKeyDown=var;
 		return;
 	}
-	cpu->reg[V]=key;
-	key=0xFF;
+	cpu->reg[V]=currKeyDown;
+	currKeyDown='\0';
 	cpu->pc+=2;
 }
 
@@ -387,6 +395,7 @@ void ldtmiSUPR(vsel V) {
 	}
 	cpu->pc+=2;
 }
+
 void ldtmiORIG(vsel V) {
 	int regCount;
 	for (regCount = 0; regCount<=V; regCount++) {

@@ -58,7 +58,7 @@ void inFileMenu(short itemNum) {
 		return;
 	case 5: // quit
 		shouldClose=true;
-		closeFile();
+		closeRom();
 		interpreterCleanup();
 		screenCleanup();
 		restoreEventMask();

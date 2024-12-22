@@ -14,8 +14,6 @@ extern bool super;
 extern bool step;
 extern short clock;
 
-extern uint8_t key;
-
 static short mode; // 1 chip, 2 super, 3 super v1.1, 4 xo
 
 bool interpreterInit();
@@ -26,7 +24,7 @@ void superMode();
 void superModernMode();
 void xoMode();
 void interpretForTick();
-void decTimers();
+void decTimers(int delta);
 void loadTest();
 void renderCPU();
 void interpreterCleanup();

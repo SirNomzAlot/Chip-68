@@ -34,7 +34,9 @@ bool multifinder = false;
 bool shouldClose = false;
 tickData timer;
 int loopCount = 0;
+
 char currKey;
+char keyQueued;
 
 bool draw = true;
 short sx = 0;
@@ -97,10 +99,16 @@ void doLoop() {
 		return;
 	}
 	eventHandler(&event);
-	if (!step) {
-		interpretForTick();
+	updateTimer();
+	if (timer.deltaTick>0) {
+		if (!step) {
+			interpretForTick();
+		}
+		decTimers(timer.deltaTick);
+		if (timer.ticksTotal%60) {
+			keyQueued='\0';
+		}
 	}
-	decTimers();
 }
 
 void waitTillClose() {
@@ -164,7 +172,10 @@ void eventHandler(EventRecord* event) {
 }
 
 void keyDownHandler(EventRecord* event) {
+	moveCursor(10,10);
+	drawChar(event->message);
 	currKey = event->message;
+	keyQueued = event->message;
 	if (currKey=='p') {
 		renderCPU();
 	}
@@ -215,10 +226,11 @@ void mouseDownHandler(EventRecord* event) {
 }
 
 void idle() {
+	updateTimer();
 	if (!step) {
 		interpretForTick();
 	}
-	decTimers();
+	decTimers(timer.deltaTick);
 }
 
 void updateTimer() {
@@ -233,9 +245,7 @@ void restoreEventMask() {
 
 void coreCleanUp() {
 	SetEventMask(oldSysMask);
-	if (fileOpen) {
-		closeFile();
-	}
+	closeRom();
 	if (window!=NULL) {
 		DisposeWindow(FrontWindow());
 		return;
