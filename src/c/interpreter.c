@@ -3,6 +3,7 @@
 #include "screen.h"
 #include "textutils.h"
 #include "core.h"
+#include "files.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -40,6 +41,7 @@ bool interpreterInit() {
 
 void reset() {
 	int c;
+	normalScale();
 	cls();
 	clock = (clock) ? clock : CLOCK_NORMAL;
 	cpu->pc=0x200;

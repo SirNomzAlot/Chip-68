@@ -42,12 +42,11 @@ resource 'MENU' (130) {
 
 resource 'MENU' (131) {
 	131, textmenuProc;
-	0, enabled; // nah
+	allEnabled, enabled; // nah
 	"Window";
-	{
-		"Scale x1", noIcon, noKey, noMark, plain;
-		"Scale x2", noIcon, noKey, noMark, plain;
-		"Scale x3", noIcon, noKey, noMark, plain;
+	{	"Scale x4", noIcon, noKey, noMark, plain;
+		"Scale x6", noIcon, noKey, noMark, plain;
+		"Scale x8", noIcon, noKey, noMark, plain;
 	}
 };
 
@@ -111,6 +110,6 @@ resource 'SIZE' (-1) {
 	reserved,
 	reserved,
 	reserved,
-	100 * 1024,
-	100 * 1024
+	200 * 1024,
+	200 * 1024
 };

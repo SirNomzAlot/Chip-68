@@ -19,9 +19,7 @@
 
 #define windowX 6
 #define windowY 42
-#define windowWidth 500
-#define windowHeight 290
-#define windowId 4
+#define windowId 0
 
 #define max_sleep 3
 
@@ -31,6 +29,7 @@ typedef struct _tickData {
 	int deltaTick;
 } tickData;
 
+extern WindowPtr window;
 extern bool shouldClose;
 extern char currKey;
 extern bool fileOpen;
@@ -42,6 +41,7 @@ void windowInit();
 void menuBarInit();
 
 void doLoop();
+void waitTillClose();
 
 void resize(short sx, short sy);
 
@@ -50,21 +50,10 @@ void keyDownHandler(EventRecord* event);
 void keyUpHandler(EventRecord* event);
 void autoKeyHandler(EventRecord* event);
 void mouseDownHandler(EventRecord* event);
-void menuBarHandler(EventRecord* event);
-
-void inAppleMenu(short itemNum);
-void inFileMenu(short itemNum);
-void inEditMenu(short itemNum);
-void inWindowMenu(short itemNum);
-void inInterpreterMenu(short itemNum);
-
-bool openFile(SFReply* r);
-void fileError(OSErr e);
-bool readFile();
-void closeFile();
 
 void printTimeInfo();
 void updateTimer();
+void restoreEventMask();
 void coreCleanUp();
 
 #endif

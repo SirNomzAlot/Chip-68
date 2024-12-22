@@ -5,6 +5,7 @@
 
 #include "textutils.h"
 
+#include <Sound.h>
 #include <MacTypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,8 +17,12 @@ registers* cpu;
 bool opcodeInit() {
 	cpu = malloc(sizeof(registers));
 	//memory = malloc(0x10000);
-	memory = malloc(0x1000);
+	memory = malloc(0x10000);
 	if (cpu==NULL||memory==NULL) {
+		moveCursor(50,100);
+		DrawCString("Could not allocate memory or cpu!");
+		SysBeep(1);
+		clock = 0;
 		return false;
 	}
 	*cpu = (registers){{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},0,0,0,0x200,0};

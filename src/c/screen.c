@@ -10,7 +10,7 @@
 bool wideScreen = false;
 bool screenUpdate = false;
 uint8_t scale = 4;
-uint8_t multiplier = 1;
+uint8_t multiplier = 4;
 uint8_t* screen;
 
 Pattern black;
@@ -23,8 +23,8 @@ void screenInit() {
 	GetIndPattern(&white, sysPatListID,20);
 
 	if (screen==NULL) {
+		shouldClose=true;
 		return;
-		//ahhhhhh
 	}
 
 	for (countX=0; countX<128; countX++) {
@@ -38,11 +38,7 @@ void raster() {
 	int x, y, s;
 	Rect pixel;
 
-    // if (!screenUpdate) {
-    // 	return;
-    // }
-    // screenUpdate=false;
-	s = scale*multiplier;
+	s = multiplier;
 	if (wideScreen) {
 		for (x=0; x<128; x++) {
 			for (y=0; y<64; y++) {
@@ -66,8 +62,8 @@ void raster() {
 
 void drawPixel(short x, short y) {
 	Rect pixel;
-    PatPtr color = &white;
-    int s = scale*multiplier;
+	PatPtr color = &white;
+	int s = multiplier;
 	if (screen[x*64+y]) {
 		color = &black;
 	}
@@ -77,7 +73,7 @@ void drawPixel(short x, short y) {
 
 void wipe() {
 	Rect screen;
-	int s = scale*multiplier;
+	int s = multiplier;
 	if (wideScreen) {
 		SetRect(&screen, 0, 0, 128*s, 64*s);
 		FillRect(&screen, &white);
@@ -95,15 +91,18 @@ void highScale() {
 }
 
 void setMultiplier(short m) {
-	if (m<1) {
+	if (m<0) {
 		return;
 	}
-	multiplier = m;
+	multiplier = m+scale;
+	wipe();
 	if (wideScreen) {
-		resize(128*scale*multiplier, 64*scale*multiplier);
+		resize(128*multiplier, 64*multiplier);
+		raster();
 		return;
 	}
-	resize(64*scale*multiplier, 32*scale*multiplier);
+	resize(64*multiplier, 32*multiplier);
+	raster();
 }
 
 void screenCleanup() {

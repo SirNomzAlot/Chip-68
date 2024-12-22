@@ -7,6 +7,9 @@
 int main(int argc, char** argv) {
 	coreInit();
 	if (!interpreterInit()) {
+		while (!shouldClose) {
+			waitTillClose();
+		}
 		coreCleanUp();
 		ExitToShell();
 		return -1;
