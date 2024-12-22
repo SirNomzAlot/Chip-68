@@ -413,7 +413,6 @@ void ldfmiORIG(vsel V) {
 		cpu->reg[regCount]=memory[cpu->i];
 		cpu->i++;
 	}
-	cpu->i;
 	cpu->pc+=2;
 }
 

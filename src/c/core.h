@@ -21,7 +21,7 @@
 #define windowY 42
 #define windowId 0
 
-#define max_sleep 3
+#define max_sleep 1
 
 typedef struct _tickData {
 	long int ticksStart;
@@ -50,8 +50,8 @@ void keyDownHandler(EventRecord* event);
 void keyUpHandler(EventRecord* event);
 void autoKeyHandler(EventRecord* event);
 void mouseDownHandler(EventRecord* event);
+void idle();
 
-void printTimeInfo();
 void updateTimer();
 void restoreEventMask();
 void coreCleanUp();

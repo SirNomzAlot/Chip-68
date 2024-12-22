@@ -89,9 +89,11 @@ void doLoop() {
 	if (!multifinder) {
 		SystemTask();
 		if (!GetNextEvent(everyEvent, &event)) {
+			idle();
 			return;
 		}
 	} else if (!WaitNextEvent(everyEvent, &event, max_sleep, NULL)) {
+		idle();
 		return;
 	}
 	eventHandler(&event);
@@ -182,6 +184,7 @@ void autoKeyHandler(EventRecord* event) {
 		interpretForTick();
 	}
 }
+
 void mouseDownHandler(EventRecord* event) {
 	WindowPtr eventWindow;
 	short int object;
@@ -209,6 +212,13 @@ void mouseDownHandler(EventRecord* event) {
 		}
 		return;
 	}
+}
+
+void idle() {
+	if (!step) {
+		interpretForTick();
+	}
+	decTimers();
 }
 
 void updateTimer() {

@@ -40,6 +40,7 @@ void raster() {
 
 	s = multiplier;
 	if (wideScreen) {
+		s/=2;
 		for (x=0; x<128; x++) {
 			for (y=0; y<64; y++) {
 				if (screen[x*64+y]) {
@@ -63,7 +64,7 @@ void raster() {
 void drawPixel(short x, short y) {
 	Rect pixel;
 	PatPtr color = &white;
-	int s = multiplier;
+	int s = (wideScreen) ? multiplier/2 : multiplier;
 	if (screen[x*64+y]) {
 		color = &black;
 	}
@@ -75,6 +76,7 @@ void wipe() {
 	Rect screen;
 	int s = multiplier;
 	if (wideScreen) {
+		s/=2;
 		SetRect(&screen, 0, 0, 128*s, 64*s);
 		FillRect(&screen, &white);
 		return;
@@ -96,11 +98,6 @@ void setMultiplier(short m) {
 	}
 	multiplier = m+scale;
 	wipe();
-	if (wideScreen) {
-		resize(128*multiplier, 64*multiplier);
-		raster();
-		return;
-	}
 	resize(64*multiplier, 32*multiplier);
 	raster();
 }
