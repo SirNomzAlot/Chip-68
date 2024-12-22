@@ -10,6 +10,8 @@ add_application(Chip68
     src/chip68.c
     src/chip68.r
     src/c/core.c
+    src/c/menu.c
+    src/c/files.c
     src/c/interpreter.c
     src/c/opcode.c
     src/c/screen.c
