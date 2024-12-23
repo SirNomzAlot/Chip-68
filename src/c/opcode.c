@@ -269,12 +269,14 @@ void rnd(vsel V, uint8_t byte) {
 // at Vx, Vy set VF = collision.
 // sprite is XORed onto screen
 void drw(vsel Vx, vsel Vy, uint8_t nibble) {
-	uint16_t c;
+	uint16_t c, modx, mody;
 	uint8_t hold, Vxx, Vyy;
 	char b, till;
 
 	Vxx=cpu->reg[Vx];
 	Vyy=cpu->reg[Vy];
+	modx=64;
+	mody=32;
 	till=8;
 	if ((Vyy%32)>((Vyy+nibble)%32)) {
 		nibble-=((Vyy+nibble)%32);
@@ -282,15 +284,19 @@ void drw(vsel Vx, vsel Vy, uint8_t nibble) {
 	if ((Vxx%64)>((Vxx+7)%64)) {
 		till-=((Vxx+7)%64);
 	}
+	if (wideScreen) {
+		modx=128;
+		mody=64;
+	}
 	cpu->reg[VF]=0;
 	for (c=0;c<nibble;c++) {
 		hold = memory[cpu->i+c];
 		for (b=0;b<till;b++) {
-			if (screen[((Vxx+b)%64)*64+(Vyy+c)%32]&(hold>>(7-b))&0x1) {
+			if (screen[((Vxx+b)%modx)*64+(Vyy+c)%mody]&(hold>>(7-b))&0x1) {
 				cpu->reg[VF]=1;
 			}
-			screen[((Vxx+b)%64)*64+(Vyy+c)%32]^=(hold>>(7-b))&0x1;
-			drawPixel((Vxx+b)%64,(Vyy+c)%32);
+			screen[((Vxx+b)%modx)*64+(Vyy+c)%mody]^=(hold>>(7-b))&0x1;
+			drawPixel((Vxx+b)%modx,(Vyy+c)%mody);
 		}
 	}
 	cpu->pc+=2;
@@ -372,6 +378,7 @@ void addi(vsel V) {
 // set I addr of sprite for digit Vx
 void ldsa(vsel V) {
 	cpu->i=(cpu->reg[V]&0xF)*5;
+	moveCursor(10,10);
 	cpu->pc+=2;
 }
 
@@ -476,7 +483,6 @@ void exiti() {
 // disable extended screen
 void low() {
 	normalScale();
-	wideScreen=false;
 	cpu->pc+=2;
 }
 
@@ -484,7 +490,6 @@ void low() {
 // enable extended screen
 void high() {
 	highScale();
-	wideScreen=true;
 	cpu->pc+=2;
 }
 
@@ -543,21 +548,27 @@ void ldfrpl(uint8_t nibble) {
 // XO chip specific
 
 void drwLXO(vsel Vx, vsel Vy, uint8_t nibble) {
-	uint16_t c;
+	uint16_t c, modx, mody;
 	uint8_t hold, Vxx, Vyy;
 	char b;
 
 	Vxx=cpu->reg[Vx];
 	Vyy=cpu->reg[Vy];
+	modx=64;
+	mody=32;
 	cpu->reg[VF]=0;
+		if (wideScreen) {
+		modx=128;
+		mody=64;
+	}
 	for (c=0;c<nibble;c++) {
 		hold = memory[cpu->i+c];
 		for (b=0;b<8;b++) {
-			if (screen[((Vxx+b)%64)*64+(Vyy+c)%32]&(hold>>(7-b))&0x1) {
+			if (screen[((Vxx+b)%modx)*64+(Vyy+c)%mody]&(hold>>(7-b))&0x1) {
 				cpu->reg[VF]=1;
 			}
-			screen[((Vxx+b)%64)*64+(Vyy+c)%32]^=(hold>>(7-b))&0x1;
-			drawPixel((Vxx+b)%64,(Vyy+c)%32);
+			screen[((Vxx+b)%modx)*64+(Vyy+c)%mody]^=(hold>>(7-b))&0x1;
+			drawPixel((Vxx+b)%modx,(Vyy+c)%mody);
 		}
 	}
 	cpu->pc+=2;

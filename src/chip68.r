@@ -61,6 +61,7 @@ resource 'MENU' (132) {
 		"XO-Chip Mode", noIcon, noKey, noMark, plain;
 		"-", noIcon, noKey, noMark, plain;
 		"Step", noIcon, "S", noMark, plain;
+		"Force Hi Res", noIcon, nokey, noMark, plain;
 		"-", noIcon, noKey, noMark, plain;
 		"Speed Slow", noIcon, noKey, noMark, plain;
 		"Speed Medium", noIcon, noKey, noMark, plain;

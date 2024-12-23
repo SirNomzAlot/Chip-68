@@ -78,7 +78,7 @@ void ldfk(vsel V);
 void ldtd(vsel V);
 void ldts(vsel V);
 void addi(vsel V);
-void ldf(vsel V);
+void ldsa(vsel V);
 void ldbcd(vsel V);
 void ldtmiSUPR(vsel V);
 void ldtmiORIG(vsel V);

@@ -111,21 +111,24 @@ void inInterpreterMenu(short itemNum) {
 		renderCPU();
 		interpretForTick();
 		return;
-	case 7:	// divider thing
+	case 7: // force hi resolution
+		highScale();
 		return;
-	case 8:	// clock slow
+	case 8:	// divider thing
+		return;
+	case 9:	// clock slow
 		clock=CLOCK_SLOW;
 		step = false;
 		return;
-	case 9:	// clock medium
+	case 10:// clock medium
 		clock=CLOCK_MEDIUM;
 		step = false;
 		return;
-	case 10:	// clock normal
+	case 11:// clock normal
 		clock=CLOCK_NORMAL;
 		step = false;
 		return;
-	case 11:	// clock ludicrous
+	case 12:// clock ludicrous
 		clock=CLOCK_LUDICROUS; // we brake for nobody, exept the cpu limits
 		step = false;
 		return;

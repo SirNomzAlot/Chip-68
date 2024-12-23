@@ -172,8 +172,6 @@ void eventHandler(EventRecord* event) {
 }
 
 void keyDownHandler(EventRecord* event) {
-	moveCursor(10,10);
-	drawChar(event->message);
 	currKey = event->message;
 	keyQueued = event->message;
 	if (currKey=='p') {

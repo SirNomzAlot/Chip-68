@@ -52,7 +52,7 @@ void reset() {
 	for (c=0x200;c<0x1000;c++) {
 		memory[c]=0;
 	}
-	wideScreen = false;
+	normalScale();
 	memcpy(memory, romSprite, 16*5);
 	if (!readRom()) {
 		loadTest();
@@ -71,7 +71,6 @@ void chipMode() {
 	ops8=&ops8CHIP;
 	opsD=&opsDCHIP;
 	opsF=&opsFCHIP;
-	wideScreen = false;
 	super = false;
 }
 
@@ -615,7 +614,7 @@ void opsFCHIP(uint16_t op) {
 		addi((op>>8)&0xF);
 		return;
 	case 0x29:
-		ldi((op>>8)&0xF);
+		ldsa((op>>8)&0xF);
 		return;
 	case 0x33:
 		ldbcd((op>>8)&0xF);
@@ -649,7 +648,7 @@ void opsFSUPR(uint16_t op) {
 		addi((op>>8)&0xF);
 		return;
 	case 0x29:
-		ldi((op>>8)&0xF);
+		ldsa((op>>8)&0xF);
 		return;
 	case 0x30:
 		ldv((op>>8)&0xF);
@@ -698,7 +697,7 @@ void opsFXO(uint16_t op) {
 		addi((op>>8)&0xF);
 		return;
 	case 0x29:
-		ldi((op>>8)&0xF);
+		ldsa((op>>8)&0xF);
 		return;
 	case 0x30:
 		ldv((op>>8)&0xF);

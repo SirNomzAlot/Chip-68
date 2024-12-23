@@ -86,9 +86,11 @@ void wipe() {
 }
 
 void normalScale() {
+	wideScreen=false;
 	scale = SCALE_NORMAL;
 }
 void highScale() {
+	wideScreen=true;
 	scale = SCALE_SUPER;
 }
 
