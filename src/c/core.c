@@ -105,7 +105,7 @@ void doLoop() {
 			interpretForTick();
 		}
 		decTimers(timer.deltaTick);
-		if (timer.ticksTotal%60) {
+		if ((timer.ticksTotal%30)==0) {
 			keyQueued='\0';
 		}
 	}

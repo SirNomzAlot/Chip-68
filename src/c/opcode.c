@@ -307,7 +307,6 @@ void drw(vsel Vx, vsel Vy, uint8_t nibble) {
 // does not busy loop
 void skp(vsel V) {
 	uint8_t button = keyToKeypad(currKey) & keyToKeypad(keyQueued);
-	keyQueued = '\0';
 	if (button!=cpu->reg[V]||button==0xFF) {
 		cpu->pc+=2;
 		return;
@@ -320,7 +319,6 @@ void skp(vsel V) {
 // does not busy loop
 void sknp(vsel V) {
 	uint8_t button = keyToKeypad(currKey) & keyToKeypad(keyQueued);
-	keyQueued = '\0';
 	if (button==cpu->reg[V]&&cpu->reg[V]!=0xFF) {
 		cpu->pc+=2;
 		return;
@@ -340,7 +338,6 @@ void ldfd(vsel V) {
 // does busy loop
 void ldfk(vsel V) {
 	uint8_t var = keyToKeypad(currKey) & keyToKeypad(keyQueued);
-	keyQueued = '\0';
 	if (var==0xFF&&currKeyDown=='\0') {
 		return;
 	}
@@ -434,7 +431,7 @@ void ldfmiORIG(vsel V) {
 
 // Super Chip Specific
 
-// 00CN
+// 00Cn
 // scroll n lines down
 void scd(uint8_t nibble) {
 	cpu->pc+=2;
@@ -476,6 +473,8 @@ void scl() {
 // 00FD
 // exit interpreter
 void exiti() {
+	step=true;
+	clock=0;
 	return;
 }
 
@@ -534,19 +533,77 @@ void ldv(vsel V) {
 }
 
 // Fx75
-// store V0-Vx in RPL user flag (x<=7)
+// store V0-Vx to disk (x<=7)
 void ldtrpl(uint8_t nibble) {
 	cpu->pc+=2;
 }
 
 // Fx85
-// read V0-Vx from RPL user flag (x<=7)
+// read V0-Vx from disk (x<=7)
 void ldfrpl(uint8_t nibble) {
 	cpu->pc+=2;
 }
 
 // XO chip specific
 
+// 00DN
+// scroll n pixels up
+void scu(uint8_t n) {
+
+}
+
+// 00FE
+// disable extended screen
+void lowXO() {
+	normalScale();
+	wipe();
+	cpu->pc+=2;
+}
+
+// 00FF
+// enable extended screen
+void highXO() {
+	highScale();
+	wipe();
+	cpu->pc+=2;
+}
+
+// 5xy2
+// save Vx-Vy or Vy-Vx to memory at i
+void ldtmiXO(vsel Vx, vsel Vy) {
+	int regCount;
+	if (Vx < Vy) {
+		for (regCount = Vx; regCount<=Vy; regCount++) {
+			memory[cpu->i+regCount]=cpu->reg[regCount];
+		}
+		cpu->pc+=2;
+		return;
+	}
+	for (regCount = Vy; regCount>=Vx; regCount--) {
+		memory[cpu->i+regCount]=cpu->reg[regCount];
+	}
+	cpu->pc+=2;
+
+}
+
+// 5xy3
+// load memory at i to Vx-Vy or Vy-Vx
+void ldfmiXO(vsel Vx, vsel Vy) {
+	int regCount;
+	if (Vx < Vy) {
+		for (regCount = Vx; regCount<=Vy; regCount++) {
+			cpu->reg[regCount]=memory[cpu->i+regCount];
+		}
+		cpu->pc+=2;
+		return;
+	}
+	for (regCount = Vy; regCount>=Vx; regCount--) {
+		cpu->reg[regCount]=memory[cpu->i+regCount];
+	}
+	cpu->pc+=2;
+}
+
+// Dxyn
 void drwLXO(vsel Vx, vsel Vy, uint8_t nibble) {
 	uint16_t c, modx, mody;
 	uint8_t hold, Vxx, Vyy;
@@ -574,6 +631,7 @@ void drwLXO(vsel Vx, vsel Vy, uint8_t nibble) {
 	cpu->pc+=2;
 }
 
+// Dxy0
 void drwHXO(vsel Vx, vsel Vy) {
 	uint16_t y;
 	uint8_t hold, Vxx, Vyy;
@@ -604,8 +662,20 @@ void drwHXO(vsel Vx, vsel Vy) {
 	cpu->pc+=2;
 }
 
+// F000, NNNN
+// load I with 16 bit val
 void ldiL() {
 	cpu->pc+=2;
-	cpu->i=((uint16_t)memory[cpu->pc])<<8+memory[cpu->pc+1];
+	cpu->i=((uint16_t)memory[cpu->pc])<<8|memory[cpu->pc+1];
 	cpu->pc+=2;
 }
+
+// Fn01
+// select drawing plane bitmask 0-3
+
+// F002
+// store 16 bytes at i in audio buffer
+
+// Fx3A
+// set audio pattern playback rate to 4000*2^((vx-64)/48)hz
+

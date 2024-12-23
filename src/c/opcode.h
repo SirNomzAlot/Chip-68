@@ -99,7 +99,11 @@ void ldtrpl(uint8_t nibble);
 void ldfrpl(uint8_t nibble);
 
 // XO chip
-
+void scu(uint8_t);
+void lowXO();
+void highXO();
+void ldtmiXO(vsel Vx, vsel Vy);
+void ldfmXO(vsel Vx, vsel Vy);
 void drwLXO(vsel Vx, vsel Vy, uint8_t nibble);
 void drwHXO(vsel Vx, vsel Vy);
 void ldiL();

@@ -128,7 +128,11 @@ void inInterpreterMenu(short itemNum) {
 		clock=CLOCK_NORMAL;
 		step = false;
 		return;
-	case 12:// clock ludicrous
+	case 12:
+		clock=CLOCK_FAST;
+		step=false;
+		return;
+	case 13:// clock ludicrous
 		clock=CLOCK_LUDICROUS; // we brake for nobody, exept the cpu limits
 		step = false;
 		return;

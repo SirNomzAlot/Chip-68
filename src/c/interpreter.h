@@ -5,10 +5,11 @@
 #include <MacTypes.h> //mactypes must come before stdbool
 #include <stdbool.h>
 
-#define CLOCK_SLOW 2 // 120hz
-#define CLOCK_MEDIUM 4 // 240hz
-#define CLOCK_NORMAL 8 // 520hz
-#define CLOCK_LUDICROUS 16// 960hz
+#define CLOCK_SLOW 2 		//  120hz
+#define CLOCK_MEDIUM 4 		//  240hz
+#define CLOCK_NORMAL 8 		//  520hz
+#define CLOCK_FAST 16 		//  960hz
+#define CLOCK_LUDICROUS 24 	// 1440hz
 
 extern bool super;
 extern bool step;

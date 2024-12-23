@@ -66,7 +66,8 @@ resource 'MENU' (132) {
 		"Speed Slow", noIcon, noKey, noMark, plain;
 		"Speed Medium", noIcon, noKey, noMark, plain;
 		"Speed Normal", noIcon, noKey, noMark, plain;
-		"Speed Ludicrous", noIcon, noKey, noMark, plain;
+		"Speed Fast", noIcon, noKey, noMark, plain;
+		"LUDICROUS SPEED", noIcon, noKey, noMark, plain;
 	}
 };
 

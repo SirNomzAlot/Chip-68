@@ -8,16 +8,17 @@
 #include <stdint.h>
 
 file rom = {0,0};
+Str255 prompt = "Load ROM File";
 
-SFTypeList list = {	(OSType)"BINA",
-					(OSType)"CHP8",
-					(OSType)"SCP8",
-					(OSType)"XOCP"
+SFTypeList list = {	'BINA',
+					'CHP8',
+					'SCP8',
+					'XOCP'
 };
 
 bool tryOpenRead() {
 	SFReply test;
-	SFGetFile((Point){100,100},NULL,NULL,0,list,NULL,&test);
+	SFGetFile((Point){100,100},prompt,NULL,-1,list,NULL,&test);
 	if (!test.good) {
 		return false;
 	}
