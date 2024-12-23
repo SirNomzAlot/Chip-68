@@ -6,8 +6,7 @@ A chip 8 interpreter for vintage macintosh
 
 Chip 68 is a chip-8, super chip-8, super chip-8 v1.1 and
 XO-chop interpreter for vintage 68k based macs running 
-system 7 and maybe system 6 (untested). It runs well enough
-in Mini vMac at x1 speed in system 7. The program touches
+system 7 and system 6. It runs on Mini vMac under both system. The program touches
 the file system, it isn't capable of writing, but may
 not close files correctly.
 
